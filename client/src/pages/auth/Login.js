@@ -9,7 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('0hornet1@gmail.com');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  // const [success, setSuccess] = useState(false);
 
   let history = useHistory();
 
@@ -32,14 +32,34 @@ const Login = () => {
         }
       )
     } catch(error) {
-      console.log('login error',error)
-      toast.error(error.message)
-      setLoading(false)
+      console.log('login error',error);
+      toast.error(error.message);
+      setLoading(false);
     }
   };
+
+  const googleLogin = () => {
+    auth.signInWithPopup(googleAuthProvider)
+    .then(async result => {
+      const { user } = result;
+      const idTokenResult = await user.getIdTokenResult();
+
+      dispatch({
+        type: 'LOGGED_IN_USER',
+        payload: { email: user.email, token: idTokenResult.token }
+      });
+    })
+  }
   return (
     <div className="container p-5">
-      <h4>Login</h4>
+      {loading ? <h4 className="text-danger">Loading...</h4> : <h4>Login</h4>}
+      <button 
+        className="btn btn-raised btn-danger mt-5"
+        onClick={googleLogin}
+
+      >
+        Login with Google
+      </button>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>password Address</label>

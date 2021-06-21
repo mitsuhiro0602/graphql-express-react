@@ -1,21 +1,24 @@
 import React, { useContext, Fragment } from 'react';
-import { Link, useHistory} from 'react-router-dom';
-import { auth } from '../firebase';
+// import { auth } from '../firebase';
+import firebase from '../firebase';
 import { AuthContext } from '../context/authContext';
+import { Link, useHistory} from 'react-router-dom';
+
 
 const Nav = () => {
-  const { state, dispatch } = useContext(AuthContext)
+  const { state, dispatch } = useContext(AuthContext);
   let history = useHistory()
 
-  const { user } = state
+  const { user } = state;
+
   const logout = () => {
-    auth().signOut()
+    firebase.auth().signOut();
     dispatch({
       type: 'LOGGED_IN_USER',
       payload: null
-    })
+    });
     history.push('/login');
-  }
+  };
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <Link className="navbar-brand" to="/">
