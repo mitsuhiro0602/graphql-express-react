@@ -1,8 +1,8 @@
 const { gql } = require('apollo-server-express');
 const { authCheck } = require('../helpers/auth');
 
-const me = (parent, args, {req, res}) => {
-  authCheck(req, res);
+const me = async (parent, args, {req, res}) => {
+   await authCheck(req);
   return 'Ryan';
 };
 
