@@ -5,6 +5,7 @@ import {gql} from 'apollo-boost'
 import omitDeep from 'omit-deep';
 import {PROFILE} from '../../graphql/queries'
 import {USER_UPDATE} from '../../graphql/mutations';
+import Resizer from "react-image-file-resizer";
 
 
 const Profile = () => {
@@ -57,8 +58,26 @@ const Profile = () => {
     setValues({...values, [e.target.name] : e.target.value })
   };
 
-  const handleImageChange = () => {
-    //
+  const fileResizeAndUpload = (e) => {
+    let fileInput = false;
+    if (e.target.files[0]) {
+      fileInput = true;
+    }
+    if (fileInput) {
+      Resizer.imageFileResizer(
+        e.target.files[0],
+        300,
+        300,
+        "JPEG",
+        100,
+        0,
+        (uri) => {
+          console.log(uri);
+          // this.setState({ newImage: uri });
+        },
+        "base64"
+      );
+    }
   };
 
   const profileUpdateForm = () => (
@@ -104,7 +123,7 @@ const Profile = () => {
         <input
           type="file"
           accept="image/*"
-          onChange={handleImageChange}
+          onChange={fileResizeAndUpload}
           className="form-control"
           placeholder="Image"
         />
