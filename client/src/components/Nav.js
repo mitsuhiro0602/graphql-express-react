@@ -2,7 +2,7 @@ import React, { useContext, Fragment } from 'react';
 // import { auth } from '../firebase';
 import firebase from '../firebase';
 import { AuthContext } from '../context/authContext';
-import { Link, useHistory} from 'react-router-dom';
+import { Link, useHistory, useParams} from 'react-router-dom';
 
 
 const Nav = () => {
@@ -38,15 +38,13 @@ const Nav = () => {
 
       <div className="collapse navbar-collapse" id="navbarSupportedContent">
         <ul className="navbar-nav mr-auto">
-          <li className="nav-item active">
-            <Link className="nav-link" to="/users">
-              Users
-            </Link>
-          </li>
-          <li className="nav-item active">
-            <Link className="nav-link" >
-            </Link>
-          </li>
+          {user && (
+            <li className="nav-item active">
+              <Link className="nav-link" to="/profile">
+                Profile
+              </Link>
+            </li>
+          )}
           {!user && (
             <Fragment>
               <li className="nav-item active">
