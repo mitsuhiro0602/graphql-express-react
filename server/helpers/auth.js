@@ -1,15 +1,11 @@
 
 var admin = require("firebase-admin");
-const { responsePathAsArray } = require("graphql");
 
 var serviceAccount = require("../config/fbServiceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-
-
-let authorized = false;
 
 exports.authCheck = async (req) => {
   try {
@@ -25,7 +21,7 @@ exports.authCheck = async (req) => {
 exports.authCheckMiddleware = (req, res, next) => {
   if(req.headers.authtoken) {
     admin.auth().verifyIdToken(req.headers.authtoken)
-    .then(result => {
+    .then((result) => {
       next();
     })
     .catch(error => console.log(error))

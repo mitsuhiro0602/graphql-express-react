@@ -8,7 +8,9 @@ const { mergeTypeDefs, mergeResolvers } = require("@graphql-tools/merge");
 const { loadFilesSync } = require("@graphql-tools/load-files");
 require('dotenv').config()
 const { authCheckMiddleware } = require('./helpers/auth');
-const cloudinary = require('cloudinary')
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const cloudinary = require('cloudinary');
 
 //express server
 const app = express();
@@ -30,6 +32,10 @@ const db = async () => {
 
 // execute database connectiuon
 db();
+
+// midllewares
+app.use(cors());
+app.use(bodyParser.json({ limit: '5mb' }));
 
 // typeDefs
 const typeDefs = mergeTypeDefs(loadFilesSync(path.join(__dirname, "./typeDefs")));
@@ -63,8 +69,8 @@ app.get('/rest', authCheckMiddleware, function(req, res) {
 // cloudinary config
 cloudinary.config({
   cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:process.env.CLOUDINARY_CLOUD_API_KEY,
-  api_secret:process.env.CLOUDINARY_CLOUD_API_SECRET
+  api_key:process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET
 })
 
 
@@ -73,13 +79,14 @@ app.post('/uploadimages', authCheckMiddleware, (req, res) => {
   cloudinary.uploader.upload(
     req.body.image,
     (result) => {
+      console.log(result);
       res.send({
         url: result.url,
         public_id: result.public_id
       });
     },
     {
-      public_id: `${Data.now()}`, //public name
+      public_id: `${Date.now()}`, //public name
       resource_type: 'auto' // JPEG, PNG
     }
   ); 
