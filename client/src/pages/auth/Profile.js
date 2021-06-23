@@ -8,6 +8,8 @@ import {USER_UPDATE} from '../../graphql/mutations';
 import Resizer from "react-image-file-resizer";
 import axios from 'axios';
 import { AuthContext } from '../../context/authContext'
+import UserProfile from '../../components/forms/UserProfile';
+import FileUpload from '../../components/FileUpload';
 
 
 const Profile = () => {
@@ -61,155 +63,16 @@ const Profile = () => {
     setValues({...values, [e.target.name] : e.target.value })
   };
 
-  const fileResizeAndUpload = (event) => {
-    // setLoading(true);
-    let fileInput = false;
-    if (event.target.files[0]) {
-      fileInput = true;
-    }
-    if (fileInput) {
-      Resizer.imageFileResizer(
-        event.target.files[0],
-        300,
-        300,
-        "JPEG",
-        100,
-        0,
-        (uri) => {
-          axios.post(
-            `${process.env.REACT_APP_REST_ENDPOINT}/uploadimages`,
-            {image: uri},
-            {
-              headers: {
-                authtoken: state.user.token
-              }
-            }
-          )
-          .then(response => {
-            setLoading(false)
-            console.log('CLOUDINARY UPLOAD', response)
-            setValues({...values, images: [...images, response.data]})
-          }) // {url, public_id }
-          .catch(error => {
-            setLoading(false)
-            console.log('CLOUDINARY UPLOAD FAILED', error)
-          })
-        },
-        "base64"
-      );
-    }
-  };
-
-  const handleImageRemove = (id) => {
-    setLoading(true)
-    axios.post(`${process.env.REACT_APP_REST_ENDPOINT}/removeimage`, {
-      public_id: id
-    }, {
-      headers: {
-        authtoken: state.user.token
-      }
-    })
-    .then(response => {
-      setLoading(false)
-      let filteredImages = images.filter(item => {
-        return item.public_id !== id
-      })
-      setValues({...values, images: filteredImages });
-    })
-    .catch(error => {
-      setLoading(false)
-      console.log(error)
-    })
-  }
-
-  const profileUpdateForm = () => (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label>Username</label>
-        <input
-          type="text"
-          name="username"
-          value={username}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Username"
-          disabled={loading}
-        />
-      </div>
-      <div className="form-group">
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          value={name}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Name"
-          disabled={loading}
-        />
-      </div>
-      <div className="form-group">
-        <label>Email</label>
-        <input
-          type="text"
-          name="email"
-          value={email}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Email"
-          disabled
-        />
-      </div>
-
-      <div className="form-group">
-        <label>About</label>
-        <textarea
-          name="about"
-          value={about}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="about"
-          disabled={loading}
-        />
-      </div>
-      <button className="btn btn-primary" type="submit" disabled={!email || loading}>
-        Submit
-      </button>
-    </form>
-  );
 
   return (
     <div className="container p-5">
       <div className="row">
-        <div className="col-md-3">
-          <div className="form-group">
-            <label className="btn btn-primary">
-              Upload Image
-              <input
-                hidden
-                type="file"
-                accept="image/*"
-                onChange={fileResizeAndUpload}
-                className="form-control"
-                placeholder="Image"
-              />
-            </label>
-          </div>
+        <div className="col-md-12 pb-3">
+          {loading ? <h4 className="text-danger">Loading...</h4> : <h4>Profile</h4>}
         </div>
-        <div className="col-md-9">
-          {images.map((image) => (
-            <img
-              src={image.url}
-              key={image.public_id}
-              alt={image.public_id}
-              style={{height: '100px'}}
-              className="float-right"
-              onClick={() => handleImageRemove(image.public_id)}
-            />
-          ))}
-        </div>
+          <FileUpload setValues={setValues} setLoading={setLoading} values={values} loading={loading}  />
       </div>
-      {profileUpdateForm()}
+      <UserProfile {...values} handleChange={handleChange} handleSubmit={handleSubmit} loading={loading} />
     </div>
   );
 };
