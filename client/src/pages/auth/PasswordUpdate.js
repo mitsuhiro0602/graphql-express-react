@@ -1,5 +1,5 @@
 import React, { useState, Fragment } from 'react';
-import firebase from '../../firebase';
+import { auth } from '../../firebase';
 import { toast } from 'react-toastify';
 import AuthForm from '../../components/forms/AuthForm';
 
@@ -8,7 +8,18 @@ const PasswordUpdate = () => {
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
-    //
+    e.preventDefault()
+    setLoading(true)
+
+    auth.currentUser.updatePassword(password)
+    .then(() => {
+      setLoading(false)
+      toast.success('Password updated');
+    })
+    .catch(error => {
+      setLoading(false);
+      toast.error(error.message);
+    })
   }
   return (
     <div className="container p-5" >
