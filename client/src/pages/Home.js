@@ -5,7 +5,7 @@ import { useQuery, useLazyQuery } from '@apollo/react-hooks'
 import { AuthContext } from "../context/authContext";
 import { useHistory } from "react-router-dom";
 import { GET_ALL_POSTS } from "../graphql/queries";
-
+import PostCard from "../components/PostCard";
 
 
 const Home = () => {
@@ -31,22 +31,15 @@ const Home = () => {
 
   return (
     <div className="container">
-      <div className="row p5">
+      <div className="row p-5">
         {data && 
-          data.allPosts.map(p => (
-            <div className="col-md-4" key={p.id}>
-              <div className="card">
-                <div className="card-body">
-                  <div className="card-title">
-                    <h4>{p.title}</h4>
-                  </div>
-                    <p className="card-text">{p.description}</p>
-                </div>
-              </div>
+          data.allPosts.map((post) => (
+            <div className="col-md-6 pt-5" key={post._id}>
+              <PostCard post={post}/>
             </div>
           ))
         }
-        </div>
+      </div>
       <div className="row p-5">
         <button onClick={() => fetchPosts()} className="btn-btn-raised btn-primary">
           Fetch posts

@@ -15,7 +15,7 @@ const PrivateRoute = ({...rest }) => {
 
   const navLinks = () => (
     <nav>
-      <ul className="nav flex-colum">
+      <ul className="nav flex-column">
         <li className="nav-item">
           <Link className="nav-link" to="/profile">
             profile

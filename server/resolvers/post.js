@@ -31,7 +31,10 @@ const postCreate = async (parent, args, {req}) => {
 }
 
 const allPosts = async (parent, args) => {
-  return await Post.find({}).exec();
+  return await Post.find({})
+    .populate('postedBy', 'username _id')
+    .sort({ createdAt: -1 })
+    .exec();
 }
 
 const postsByUser = async (parent, args, {req}) => {
@@ -42,7 +45,7 @@ const postsByUser = async (parent, args, {req}) => {
 
   return await Post.find({postedBy: currentUserFromDb})
     .populate('postedBy', '_id username')
-    .sort({createdAt: -1});
+    .sort({createdAt: -1 });
 };
 
 module.exports = {
