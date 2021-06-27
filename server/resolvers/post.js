@@ -45,7 +45,7 @@ const postsByUser = async (parent, args, {req}) => {
 
   return await Post.find({postedBy: currentUserFromDb})
     .populate('postedBy', '_id username')
-    .sort({createdAt: -1 });
+    .sort({createdAt: -1});
 };
 
 module.exports = {
