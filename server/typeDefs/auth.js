@@ -40,6 +40,8 @@ module.exports = gql`
   }
   type Query {
     profile: User!
+    publicProfile(username: String!): User!
+    allUsers: [User!]
   }
   type Mutation {
     userCreate: UserCreateResponse!

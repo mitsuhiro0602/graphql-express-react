@@ -7,7 +7,10 @@ const { makeExecutableSchema } = require("graphql-tools");
 const { mergeTypeDefs, mergeResolvers } = require("@graphql-tools/merge");
 const { loadFilesSync } = require("@graphql-tools/load-files");
 require('dotenv').config()
-const { authCheck } = require('./helpers/auth');
+const { authCheckMiddleware } = require('./helpers/auth');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const cloudinary = require('cloudinary');
 
 //express server
 const app = express();
@@ -15,7 +18,7 @@ const app = express();
 // db
 const db = async () => {
   try {
-    const success = await mongoose.connect(process.env.DATABASE, {
+    const success = await mongoose.connect(process.env.DATABASE_CLOUD, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
@@ -29,6 +32,10 @@ const db = async () => {
 
 // execute database connectiuon
 db();
+
+// midllewares
+app.use(cors());
+app.use(bodyParser.json({ limit: '5mb' }));
 
 // typeDefs
 const typeDefs = mergeTypeDefs(loadFilesSync(path.join(__dirname, "./typeDefs")));
@@ -53,11 +60,48 @@ apolloServer.applyMiddleware({ app });
 const httpserver = http.createServer(app)
 
 // rest endpoint
-app.get('/rest', authCheck, function(req, res) {
+app.get('/rest', authCheckMiddleware, function(req, res) {
   res.json({
     data: 'you hit rest endpoint great'
   })
 })
+
+// cloudinary config
+cloudinary.config({
+  cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET
+})
+
+
+// upload
+app.post('/uploadimages', authCheckMiddleware, (req, res) => {
+  cloudinary.uploader.upload(
+    req.body.image,
+    (result) => {
+      console.log(result);
+      res.send({
+        url: result.url,
+        public_id: result.public_id
+      });
+    },
+    {
+      public_id: `${Date.now()}`, //public name
+      resource_type: 'auto' // JPEG, PNG
+    }
+  ); 
+});
+
+// remove image
+app.post('/removeimage', authCheckMiddleware, (req, res) => {
+  let image_id = req.body.public_id
+
+  cloudinary.uploader.destroy(image_id, (error, result) => {
+    if(error) return res.json({success: false, error});
+    re.send('ok');
+  });
+});
+
 
 // port
 app.listen(process.env.PORT, function() {

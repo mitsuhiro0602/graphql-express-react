@@ -1,13 +1,19 @@
-import React, {useState, useMemo, Fragment } from 'react';
+import React, {useState, useMemo, Fragment, useContext } from 'react';
 import {toast} from 'react-toastify';
 import { useQuery, useMutation } from '@apollo/react-hooks';
-import {gql} from 'apollo-boost'
+import {gql} from 'apollo-boost';
 import omitDeep from 'omit-deep';
-import {PROFILE} from '../../graphql/queries'
+import {PROFILE} from '../../graphql/queries';
 import {USER_UPDATE} from '../../graphql/mutations';
+import Resizer from "react-image-file-resizer";
+import axios from 'axios';
+import { AuthContext } from '../../context/authContext'
+import UserProfile from '../../components/forms/UserProfile';
+import FileUpload from '../../components/FileUpload';
 
 
 const Profile = () => {
+  const { state } = useContext(AuthContext)
   const [values, setValues] = useState({
     username: '',
     name: '',
@@ -15,7 +21,7 @@ const Profile = () => {
     about: '',
     images: []
   })
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const {data} = useQuery(PROFILE)
 
@@ -57,76 +63,18 @@ const Profile = () => {
     setValues({...values, [e.target.name] : e.target.value })
   };
 
-  const handleImageChange = () => {
-    //
-  };
 
-  const profileUpdateForm = () => (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label>Username</label>
-        <input
-          type="text"
-          name="username"
-          value={username}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Username"
-          disabled={loading}
-        />
+  return (
+    <div className="container p-5">
+      <div className="row">
+        <div className="col-md-12 pb-3">
+          {loading ? <h4 className="text-danger">Loading...</h4> : <h4>Profile</h4>}
+        </div>
+          <FileUpload setValues={setValues} setLoading={setLoading} values={values} loading={loading}  />
       </div>
-      <div className="form-group">
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          value={name}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Name"
-          disabled={loading}
-        />
-      </div>
-      <div className="form-group">
-        <label>Email</label>
-        <input
-          type="text"
-          name="email"
-          value={email}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="Email"
-          disabled
-        />
-      </div>
-      <div className="form-group">
-        <label>Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="form-control"
-          placeholder="Image"
-        />
-      </div>
-      <div className="form-group">
-        <label>About</label>
-        <textarea
-          name="about"
-          value={about}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="about"
-          disabled={loading}
-        />
-      </div>
-      <button className="btn btn-primary" type="submit" disabled={!email || loading}>
-        Submit
-      </button>
-    </form>
-  )
-
-  return <div className="container p-5">{profileUpdateForm()}</div>;
+      <UserProfile {...values} handleChange={handleChange} handleSubmit={handleSubmit} loading={loading} />
+    </div>
+  );
 };
 
 export default Profile;
