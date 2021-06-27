@@ -17,7 +17,9 @@ const postCreate = async (parent, args, {req}) => {
 
   const currentUserFromDb = await User.findOne({
     email: currentUser.email
-  })
+  }).exec();
+    
+
   let newPost = await new Post({
     ...args.input,
     postedBy: currentUserFromDb._id
@@ -32,9 +34,21 @@ const allPosts = async (parent, args) => {
   return await Post.find({}).exec();
 }
 
+const postsByUser = async (parent, args, {req}) => {
+  const currentUser = await authCheck(req);
+  const currentUserFromDb = await User.findOne({
+    email: currentUser.email
+  });
+
+  return await Post.find({postedBy: currentUserFromDb})
+    .populate('postedBy', '_id username')
+    .sort({createdAt: -1});
+};
+
 module.exports = {
   Query: {
-    allPosts
+    allPosts,
+    postsByUser
   },
   Mutation: {
     postCreate
