@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/authContext';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import omitDeep from 'omit-deep';
 import FileUpload from '../../components/FileUpload';
-import { POST_CREATE } from '../../graphql/mutations';
+import { POST_CREATE, POST_DELETE } from '../../graphql/mutations';
 import { POSTS_BY_USER } from '../../graphql/queries';
 import PostCard from '../../components/PostCard';
 
@@ -45,6 +45,29 @@ const Post = () => {
     },
     onError: (err) => console.log(err)
   })
+
+  const [postDelete] = useMutation(POST_DELETE, {
+    update: ({data}) => {
+      console.log('POST DELETE MUTATION', data)
+      toast.error('Post deleted')
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error('Post delete failed');
+    }
+  });
+
+  const handleDelete = async postId => {
+    let answer = window.confirm('Delete?');
+    if(answer) {
+      setLoading(true)
+      postDelete({
+        variables: {postId},
+        refetchQueries: [{query: POSTS_BY_USER}]
+      })
+      setLoading(false);
+    }
+  }
   
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -94,10 +117,15 @@ const Post = () => {
       </div>
       <hr />
       <div className="row p-5">
-        {posts && 
+        {posts &&
           posts.postsByUser.map((post) => (
             <div className="col-md-6 pt-5" key={post._id}>
-             <PostCard post={post} />
+              <PostCard
+                post={post}
+                handleDelete={handleDelete}
+                showUpdateButton={true}
+                showDeleteButton={true}
+              />
             </div>
           ))
         }
