@@ -19,7 +19,7 @@ const PostCard = ({ post, handleDelete = (f) => f, showUpdateButton= false, show
           <button onClick={ () => handleDelete(post._id)} className="btn m-2 btn-danger">Delete</button>
         )}
         {showUpdateButton && (
-          <button className="btn m-2 btn-warning">Update</button>
+          <button onClick={() => history.push(`/post/update/${post._id}`)} className="btn m-2 btn-warning">Update</button>
         )}
       </div>
     </div>

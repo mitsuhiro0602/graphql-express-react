@@ -90,6 +90,8 @@ const FileUpload = ({setValues, setLoading, values, loading, singleUpload = fals
       console.log(error)
     });
   }
+
+
   return (
     <div className="row">
       <div className="col-md-3">
