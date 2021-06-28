@@ -1,7 +1,19 @@
 import React, { useState, useContext } from "react";
 import { Switch, Route } from 'react-router-dom';
-import ApolloClient from 'apollo-boost';
+import ApolloClient from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { HttpLink } from 'apollo-link-http';
+
+// from apollo boost
+// import ApolloClient, { InMemoryCache, HttpLink } from 'apollo-boost';
+//gql
 import { gql } from 'apollo-boost';
+import { split } from "apollo-link";
+import { setContext } from "apollo-link-context";
+import { WebSocketLink } from "apollo-link-ws";
+import { getMainDefinition } from "apollo-utilities";
+
+
 import { ApolloProvider } from '@apollo/react-hooks';
 // import components
 
@@ -23,22 +35,65 @@ import Post from './pages/post/Post';
 import PostUpdate from './pages/post/PostUpdate';
 import SinglePost from './pages/post/SinglePost';
 import SingleUser from './pages/SingleUser';
+import SearchResult from "./components/SearchResult";
 
 
 const App = () => {
   const {state} = useContext(AuthContext)
-  const {user} = state
+  const {user} = state;
 
-  const client = new ApolloClient({
-    uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
-    request: operation => {
-      operation.setContext({
-        headers: {
-          authtoken: user ? user.token : ''
-        }
-      })
+  // 1. crete websocket link
+  const wsLink = new WebSocketLink({
+    uri: process.env.REACT_APP_GRAPHQL_WS_ENDPOINT,
+    options: {
+      reconnect: true
     }
   });
+
+  // 2. create http link
+  const httpLink = new HttpLink({
+    uri: process.env.REACT_APP_GRAPHQL_ENDPOINT
+  });
+
+  // 3. setContext for authtoken
+  const authLink = setContext(() => {
+    return {
+      headers: {
+        authtoken: user ? user.token : ''
+      }
+    }
+  })
+
+  // 4. concat http and authtolen link
+  const httpAuthLink = authLink.concat(httpLink);
+
+  // 5. use split to split http link or websocket link
+  const link = split(
+    ({query}) => {
+      // spilit link based on operation type
+      const definition = getMainDefinition(query);
+      return definition.kind === "OperationDefinition" && definition.operation === "subscription";
+    }, 
+    wsLink,
+    httpAuthLink
+  );
+
+  // 6. 
+  const client = new ApolloClient({
+    cache: new InMemoryCache(),
+    link
+  });
+
+  // const client = new ApolloClient({
+  //   uri: process.env.REACT_APP_GRAPHQL_ENDPOINT,
+  //   request: operation => {
+  //     operation.setContext({
+  //       headers: {
+  //         authtoken: user ? user.token : ''
+  //       }
+  //     })
+  //   }
+  // });
   return (
     <ApolloProvider client={client}>
       <Nav />
@@ -56,6 +111,7 @@ const App = () => {
         <PrivateRoute exact path="/post/update/:postid" component={PostUpdate} />
         <Route exact path="/user/:username" component={SingleUser} />
         <Route exact path="/post/:postid" component={SinglePost} />
+        <Route exact path="/search/:query" component={SearchResult} />
       </Switch>
     </ApolloProvider>
   );
