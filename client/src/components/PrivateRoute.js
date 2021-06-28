@@ -15,7 +15,7 @@ const PrivateRoute = ({...rest }) => {
 
   const navLinks = () => (
     <nav>
-      <ul className="nav flex-colum">
+      <ul className="nav flex-column">
         <li className="nav-item">
           <Link className="nav-link" to="/profile">
             profile
@@ -37,10 +37,10 @@ const PrivateRoute = ({...rest }) => {
   const renderContent = () => (
     <div className="container-fluid pt-5">
       <div className="row">
-        <div className="col-md-4">
+        <div className="col-md-3">
           {navLinks()}
         </div>
-        <div className="col-md-8">
+        <div className="col-md-9">
           <Route {...rest} />
         </div>
       </div>
