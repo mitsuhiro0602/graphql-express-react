@@ -4,13 +4,17 @@ import { gql } from 'apollo-boost'
 import { useQuery, useLazyQuery } from '@apollo/react-hooks'
 import { AuthContext } from "../context/authContext";
 import { useHistory } from "react-router-dom";
-import { GET_ALL_POSTS } from "../graphql/queries";
+import { GET_ALL_POSTS, TOTAL_POSTS } from "../graphql/queries";
 import PostCard from "../components/PostCard";
+import PostPagination from "../components/PostPagination";
 
 
 const Home = () => {
-
-  const { data, loading, error } = useQuery(GET_ALL_POSTS);
+  const [page, setPage] = useState(1)
+  const { data, loading, error } = useQuery(GET_ALL_POSTS, {
+    variables: {page}
+  });
+  const {data: postCount} = useQuery(TOTAL_POSTS)
   
   const [fetchPosts, { data: posts }] = useLazyQuery(GET_ALL_POSTS);
   //access context
@@ -26,6 +30,8 @@ const Home = () => {
     });
   }
 
+  
+
   if(loading) return <p className="p-5">Loading...</p>;
 
 
@@ -40,11 +46,7 @@ const Home = () => {
           ))
         }
       </div>
-      <div className="row p-5">
-        <button onClick={() => fetchPosts()} className="btn-btn-raised btn-primary">
-          Fetch posts
-        </button>
-      </div>
+      <PostPagination page={page} setPage={setPage} postCount={postCount} />
       <hr />
       {JSON.stringify(posts)}
       <hr />

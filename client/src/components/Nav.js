@@ -44,11 +44,6 @@ const Nav = () => {
               Users
             </Link>
           </li>
-          <li className="nav-item">
-            <Link className="nav-link" to="/register">
-              Register
-            </Link>
-          </li>
           {user && (
             <li className="nav-item active">
               <Link className="nav-link" to="/profile">

@@ -31,8 +31,12 @@ const postCreate = async (parent, args, {req}) => {
 }
 
 const allPosts = async (parent, args) => {
+  const currentPage = args.page || 1
+  const perPage = 3
   return await Post.find({})
+    .skip((currentPage - 1) * perPage)
     .populate('postedBy', 'username _id')
+    .limit(perPage)
     .sort({ createdAt: -1 })
     .exec();
 }
@@ -76,13 +80,19 @@ const postDelete = async (parent, args, {req} ) => {
   if(currentUserFromDb._id.toString() !== postToDelete.postedBy._id.toString()) throw new Error('Unauthorized action');
   let deletedPost = await Post.findByIdAndDelete({_id: args.postId}).exec()
   return deletedPost;
-}
+};
+
+const totalPosts = async (parent, args) => 
+  await Post.find({})
+    .estimatedDocumentCount()
+    .exec();
 
 module.exports = {
   Query: {
     allPosts,
     postsByUser,
-    singlePost
+    singlePost,
+    totalPosts
   },
   Mutation: {
     postCreate,
