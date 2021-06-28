@@ -31,7 +31,7 @@ const AuthProvider = ({children}) => {
 
         dispatch({
           type: 'LOGGED_IN_USER',
-          payload: {emai: user.email, token: idTokenResult.token}
+          payload: {email: user.email, token: idTokenResult.token}
         })
       } else {
         dispatch({

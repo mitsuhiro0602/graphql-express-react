@@ -71,8 +71,8 @@ const App = () => {
   const link = split(
     ({query}) => {
       // spilit link based on operation type
-      const definition = getMainDefinition(query)
-      return(definition.kind === "OperationDefinition" && definition.operation === "subscription")
+      const definition = getMainDefinition(query);
+      return definition.kind === "OperationDefinition" && definition.operation === "subscription";
     }, 
     wsLink,
     httpAuthLink
