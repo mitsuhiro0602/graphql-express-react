@@ -1,95 +1,93 @@
-import React, { useState, useMemo, useEffect} from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useLazyQuery, useMutation } from '@apollo/react-hooks';
-import {SINGLE_POST} from '../../graphql/queries';
-import {POST_UPDATE} from '../../graphql/mutations';
+import { SINGLE_POST } from '../../graphql/queries';
+import { POST_UPDATE } from '../../graphql/mutations';
 import omitDeep from 'omit-deep';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import FileUpload from '../../components/FileUpload';
 
-
 const PostUpdate = () => {
-  const [values, setValues] = useState({
-    content: '',
-    image: {
-      url: '',
-      public_id: ''
-    }
-  })
+    const [values, setValues] = useState({
+        content: '',
+        image: {
+            url: '',
+            public_id: ''
+        }
+    });
+    const [getSinglePost, { data: singlePost }] = useLazyQuery(SINGLE_POST);
+    const [postUpdate] = useMutation(POST_UPDATE);
 
-  const [getSinglePost, {data: singlePost}] = useLazyQuery(SINGLE_POST)
-  const [postUpdate] = useMutation(POST_UPDATE)
+    const [loading, setLoading] = useState(false);
+    // router
+    const { postid } = useParams();
+    // destructure
+    const { content, image } = values;
 
-  const [loading, setLoading] = useState(false);
+    useMemo(() => {
+        if (singlePost) {
+            setValues({
+                ...values,
+                _id: singlePost.singlePost._id,
+                content: singlePost.singlePost.content,
+                image: omitDeep(singlePost.singlePost.image, ['__typename'])
+            });
+        }
+    }, [singlePost]);
 
-  // router
-  const {postid} = useParams() // paramspostid
+    useEffect(() => {
+        console.log(postid);
+        getSinglePost({ variables: { postId: postid } });
+    }, []);
 
-  // destructure
-  const { content, image } = values
+    const handleChange = (e) => {
+        setValues({ ...values, [e.target.name]: e.target.value });
+    };
 
-  useMemo(() => {
-    if(singlePost) {
-      setValues({
-        ...values,
-        _id: singlePost.singlePost._id,
-        content: singlePost.singlePost.content,
-        image: omitDeep(singlePost.singlePost.image, ['__typename'])
-      });
-    }
-  }, [singlePost]);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        postUpdate({ variables: { input: values } });
+        setLoading(false);
+        toast.success('Post Updated');
+    };
 
-  useEffect(() => {
-    console.log(postid);
-    getSinglePost({variables: { postId: postid }});
-  }, [])
+    const updateForm = () => (
+        <form onSubmit={handleSubmit}>
+            <div className="form-group">
+                <textarea
+                    value={content}
+                    onChange={handleChange}
+                    name="content"
+                    rows="5"
+                    className="md-textarea form-control"
+                    placeholder="Write something cool"
+                    maxLength="150"
+                    disabled={loading}
+                ></textarea>
+            </div>
 
-  const handleChange = (e) => {
-    setValues({...values, [e.target.value]: e.target.value });
-  }
+            <button className="btn btn-primary" type="submit" disabled={loading || !content}>
+                Post
+            </button>
+        </form>
+    );
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true)
-    postUpdate({variables: {input: values}})
-    setLoading(false)
-    toast.success('Post Updated');
-    //
-  }
+    return (
+        <div className="container p-5">
+            {loading ? <h4 className="text-danger">Loading...</h4> : <h4>Update</h4>}
 
-  const updateForm = () => (
-    <form onSubmit={handleSubmit}>
-      <div className="form-group">
-        <textarea
-          value={content}
-          onChange={handleChange}
-          name="content"
-          rows="10"
-          className="md-textarea form-control"
-          placeholder="Write something cool"
-          maxLength="150"
-          disabled={loading}
-        />
-      </div>
-      <button className="btn btn-primary"type="submit" disabled={loading || !content}>
-        Post
-      </button>
-    </form>
-  )
+            <FileUpload
+                values={values}
+                loading={loading}
+                setValues={setValues}
+                setLoading={setLoading}
+                singleUpload={true}
+            />
 
-  return (
-    <div className="container p-5">
-      { loading ? <h4 className="text-danger">Loading...</h4> : <h4>Update</h4>}
-      <FileUpload 
-        values={values}
-        loading={loading}
-        setValues={setValues}
-        setLoading={setLoading}
-        singleUpload={true}
-      />
-      {updateForm()}
-    </div>
-  );
+            {updateForm()}
+        </div>
+    );
 };
 
 export default PostUpdate;
