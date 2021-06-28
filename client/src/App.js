@@ -69,7 +69,7 @@ const App = () => {
 
   // 5. use split to split http link or websocket link
   const link = split(
-    (query) => {
+    ({query}) => {
       // spilit link based on operation type
       const definition = getMainDefinition(query)
       return(definition.kind === "OperationDefinition" && definition.operation === "subscription")
