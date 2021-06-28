@@ -9,7 +9,9 @@ const PostCard = ({ post, handleDelete = (f) => f, showUpdateButton= false, show
   return (
      <div className="card text-center" style={{minHeight: '375px' }}>
       <div className="card-body">
-        <Image image={image} />
+        <Link to={`/post/${post._id}`}>
+          <Image image={image} />
+        </Link>
         <h4 className="text-primary">@{post.postedBy.username}</h4>
         <hr />
         <small>{content}</small>
