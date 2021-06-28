@@ -53,7 +53,7 @@ export const TOTAL_POSTS = gql`
 `
 
 export const SEARCH = gql`
-  query search($query: String! {
+  query search($query: String!) {
     search(query: $query) {
       ...postData
     }

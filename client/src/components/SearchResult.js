@@ -30,7 +30,11 @@ const SearchResult = () => {
   return (
     <div className="container">
       <div className="row pb-5">
-        {JSON.stringify(data)}
+        {data.search.map((post) => (
+          <div className="col-md-4 pt-5" key={post._id}>
+            <PostCard post={post} />
+          </div>
+        ))}
       </div>
       {/* search results / {query} */}
     </div>

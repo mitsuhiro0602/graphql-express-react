@@ -5,11 +5,12 @@ const {DateTimeResolver} = require('graphql-scalars');
 const Post = require('../models/post');
 const User = require('../models/user');
 
-// queries
+// subscriptions
+const POST_ADDED = "POST_ADDED";
 
 
 // mutations
-const postCreate = async (parent, args, {req}) => {
+const postCreate = async (parent, args, {req, pubsub}) => {
   const currentUser = await authCheck(req)
 
   // validation
@@ -26,6 +27,7 @@ const postCreate = async (parent, args, {req}) => {
   }).save()
   .then((post) => post.populate('postedBy', '_id username').execPopulate());
   
+  pubsub.publish(POST_ADDED, {postAdded: newPost});
   
   return newPost;
 }
@@ -105,5 +107,10 @@ module.exports = {
     postCreate,
     postUpdate,
     postDelete
+  },
+  Subscription: {
+    postAdded: {
+      subscribe: (parent, args, {pubsub}) => pubsub.asyncIterator([POST_ADDED])
+    }
   }
 };

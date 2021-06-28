@@ -7,6 +7,7 @@ module.exports = gql `
     image: Image
     postedBy: User
   }
+  # queries
   type Query {
     totalPosts: Int!
     allPosts(page: Int): [Post!]!
@@ -31,6 +32,11 @@ module.exports = gql `
     postCreate(input: PostCreateInput!): Post!
     postUpdate(input: PostUpdateInput!): Post!
     postDelete(postId: String!): Post!
+  }
+
+  # subscriptions
+  type Subscription {
+    postAdded: Post
   }
 
 `;
